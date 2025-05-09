@@ -1,0 +1,156 @@
+/*.root {
+    -fx-background-color: #f6cfc2;
+    -fx-font-family: "Segoe UI", sans-serif;
+}
+
+.label-title {
+    -fx-font-size: 22px;
+    -fx-text-fill: #4e4e4e;
+    -fx-font-weight: bold;
+}
+
+.input-field {
+    -fx-background-color: white;
+    -fx-background-radius: 15px;
+    -fx-padding: 8px 15px;
+    -fx-font-size: 14px;
+}
+
+.button-main {
+    -fx-background-color: #d08979;
+    -fx-text-fill: white;
+    -fx-background-radius: 20px;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 5, 0, 2, 2);
+}
+
+.profile-pic {
+    -fx-background-radius: 50%;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 4, 0, 1, 1);
+}
+
+.chat-bubble-left {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 15px;
+    -fx-padding: 10px;
+    -fx-text-fill: #333;
+    -fx-wrap-text: true;
+}
+
+.chat-bubble-right {
+    -fx-background-color: #d08979;
+    -fx-background-radius: 15px;
+    -fx-padding: 10px;
+    -fx-text-fill: white;
+    -fx-wrap-text: true;
+}
+*/
+//welcome page
+
+.root-layout {
+    -fx-background-color: #FF6363;
+    -fx-background2-color:#FF8282;
+    -fx-padding: 10;
+    -fx-spacing: 10;
+}
+.bg-color{
+-fx-background-color: #0B0B5C;
+}
+
+.top-bar {
+    -fx-background-color: #330303;
+    -fx-padding: 10;
+}
+
+.user-label {
+    -fx-text-fill: black;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+}
+
+.chat-scroll {
+    -fx-background: #f9f9f9;
+    -fx-border-color: #ccc;
+    -fx-border-width: 1px;
+}
+
+.chat-message {
+    -fx-background-color: #e1f5fe;
+    -fx-padding: 8;
+    -fx-background-radius: 10;
+    -fx-font-size: 14px;
+}
+
+.input-bar {
+    -fx-spacing: 10;
+    -fx-padding: 10;
+}
+
+.input-field {
+    -fx-pref-width: 300;
+}
+
+.send-button {
+    -fx-background-color: #0077cc;
+    -fx-text-fill: white;
+    -fx-font-size: 18px;
+}
+/* General AnchorPane Layout */
+.anchor-pane {
+    -fx-background-color: linear-gradient(to bottom right, #1f1c2c, #928dab);
+}
+
+/* Welcome Label */
+.label {
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(one-pass-box, rgba(0,0,0,0.6), 3, 0.0, 1, 1);
+}
+
+/* Buttons Style */
+.button {
+    -fx-background-color: #ffffff22;
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-border-color: #ffffff88;
+    -fx-border-radius: 20px;
+    -fx-background-radius: 20px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 4, 0.1, 2, 2);
+}
+
+.button:hover {
+    -fx-background-color: #ffffff33;
+    -fx-scale-x: 1.02;
+    -fx-scale-y: 1.02;
+}
+
+/* Optional: Add spacing within container if needed */
+.anchor-pane > .anchor-pane {
+    -fx-padding: 20;
+}
+
+//admin dashboard
+.gradient-background{
+-fx-background-color:linear-gradient(from 25% 25% to 100% 100%, #D91F4E,#FF854C);
+}
+.container{
+-fx-background-color:rgba(255,255,255,0.2);
+-fx-background-radius:10;
+}
+
+.message-bubble {
+    -fx-background-color: #e1f5fe;
+    -fx-padding: 8;
+    -fx-background-radius: 8;
+    -fx-wrap-text: true;
+    -fx-max-width: 300;
+}
+
+.notification-label {
+    -fx-font-style: italic;
+    -fx-text-fill: gray;
+    -fx-alignment: center;
+}
