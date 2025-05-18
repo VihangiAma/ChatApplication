@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<HBox spacing="10" alignment="TOP_LEFT" maxWidth="600" 
+      xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="org.example.chat_application.controller.ChatBubbleController">
+
+    <padding>
+        <Insets top="5" right="5" bottom="5" left="5" />
+    </padding>
+
+    <ImageView fx:id="profileImage" fitWidth="40" fitHeight="40" style="-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 5, 0, 0, 0); -fx-background-radius: 20;" />
+
+    <VBox spacing="5" style="-fx-background-color: #F38C79; -fx-background-radius: 15; -fx-padding: 10;">
+        <Label fx:id="userName" style="-fx-font-weight: bold; -fx-text-fill: white;">
+            <font>
+                <Font name="System Bold" size="13.0" />
+            </font>
+        </Label>
+        <Label fx:id="messageText" wrapText="true" style="-fx-text-fill: white;">
+            <font>
+                <Font size="14.0" />
+            </font>
+        </Label>
+    </VBox>
+</HBox>
