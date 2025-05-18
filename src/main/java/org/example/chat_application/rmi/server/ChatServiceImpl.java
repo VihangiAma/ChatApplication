@@ -86,23 +86,54 @@ public class ChatServiceImpl extends UnicastRemoteObject implements ChatService 
     }
 
     @Override
-    public void registerClient(ClientInterface client, String name, User user) throws RemoteException {
+    public synchronized void registerClient(ClientInterface client, String name, User user) throws RemoteException {
+        System.out.println("Registering client: " + name);
+
+        // Store client and user information
         clients.put(name, client);
         clientUsers.put(name, user);
 
+        // Set user as online
+        user.setOnline(true);
+
+        // Broadcast online status to all clients
+        broadcastUserOnlineStatus(name, true);
+
         // Create a ChatUser in the ChatManager
-        chatManager.getChatUser(user, client);
+        ChatUser chatUser = chatManager.getChatUser(user, client);
 
-        // Notify about active chats if user is subscribed
-        for (Map.Entry<Integer, String> entry : activeChats.entrySet()) {
+        // Check all chats that this user is subscribed to
+        for (Map.Entry<Integer, Set<String>> entry : chatSubscriptions.entrySet()) {
             int chatId = entry.getKey();
-            String adminName = entry.getValue();
+            Set<String> subscribers = entry.getValue();
 
-            if (chatSubscriptions.containsKey(chatId) && 
-                chatSubscriptions.get(chatId).contains(name)) {
-                client.notifyAdminStartedChat(chatId, adminName);
+            if (subscribers.contains(name)) {
+                System.out.println("User " + name + " is subscribed to chat " + chatId + ", ensuring proper subscription");
+
+                // Get the chat room
+                Chat chat = chatDAO.getChatById(chatId);
+                String chatName = "Chat " + chatId;
+                if (chat != null) {
+                    chatName = chat.getName() != null && !chat.getName().isEmpty() ? 
+                              chat.getName() : "Chat " + chat.getChatId();
+                }
+
+                // Get or create the chat room in the ChatManager
+                ChatRoom chatRoom = chatManager.getChatRoom(chatId, chatName);
+
+                // Subscribe the user to the chat room using Observer pattern
+                chatUser.subscribe(chatRoom);
+
+                // Notify the user about this chat if it's active
+                if (activeChats.containsKey(chatId)) {
+                    String adminName = activeChats.get(chatId);
+                    client.notifyAdminStartedChat(chatId, adminName);
+                    System.out.println("Notified user " + name + " about active chat " + chatId);
+                }
             }
         }
+
+        System.out.println("Client registration complete for: " + name);
     }
 
     @Override
@@ -178,6 +209,15 @@ public class ChatServiceImpl extends UnicastRemoteObject implements ChatService 
 
     @Override
     public synchronized void removeClient(String name) throws RemoteException {
+        // Set user as offline before removing
+        User user = clientUsers.get(name);
+        if (user != null) {
+            user.setOnline(false);
+
+            // Broadcast offline status to all clients
+            broadcastUserOnlineStatus(name, false);
+        }
+
         clients.remove(name);
         clientUsers.remove(name);
 
@@ -194,24 +234,34 @@ public class ChatServiceImpl extends UnicastRemoteObject implements ChatService 
 
     @Override
     public void startChat(int chatId, String adminName) throws RemoteException {
-        // Mark chat as active
         activeChats.put(chatId, adminName);
 
-        // Initialize chat log
         String startTime = timeFormat.format(new Date());
         StringBuilder chatLog = new StringBuilder();
         chatLog.append("Chat started at: ").append(startTime).append("\n");
         chatLogs.put(chatId, chatLog);
 
-        // Initialize subscription set if not exists
         if (!chatSubscriptions.containsKey(chatId)) {
             chatSubscriptions.put(chatId, new HashSet<>());
         }
 
-        // Notify subscribed users
+        // ✅ New: Notify online & subscribed users through dashboard
+        for (String username : chatSubscriptions.get(chatId)) {
+            if (clients.containsKey(username)) {
+                try {
+                    clients.get(username).receiveDashboardNotification(
+                            "Admin " + adminName + " started a new chat (ID: " + chatId + ")");
+                } catch (Exception e) {
+                    System.err.println("Error sending notification to " + username + ": " + e.getMessage());
+                }
+            }
+        }
+
+
+        // Existing logic
         notifySubscribedUsers(chatId, "Chat started by admin: " + adminName);
 
-        // Update chat in database with start time
+        // Update DB
         try {
             Chat chat = chatDAO.getChatById(chatId);
             if (chat != null) {
@@ -223,75 +273,67 @@ public class ChatServiceImpl extends UnicastRemoteObject implements ChatService 
         }
     }
 
+
     @Override
-    public void subscribeToChat(int chatId, String userName) throws RemoteException {
+    public synchronized void subscribeToChat(int chatId, String userName) throws RemoteException {
         // Get or create chat room and user
         Chat chat = chatDAO.getChatById(chatId);
-        String chatName = "Chat " + chatId;
-        if (chat != null) {
-            chatName = "Chat " + chat.getChatId();
-        }
+        String chatName = chat != null && chat.getName() != null && !chat.getName().isEmpty()
+                ? chat.getName() : "Chat " + chatId;
 
-        // Always ensure the chat subscription map has an entry for this chat
-        if (!chatSubscriptions.containsKey(chatId)) {
-            chatSubscriptions.put(chatId, new HashSet<>());
-        }
+        chatSubscriptions.putIfAbsent(chatId, new HashSet<>());
 
-        // Get the subscribers set for this chat
         Set<String> subscribers = chatSubscriptions.get(chatId);
 
-        // Always add the username to the subscribers set if not already there
-        if (!subscribers.contains(userName)) {
-            subscribers.add(userName);
-            System.out.println("Added user " + userName + " to chat " + chatId + " subscribers list");
+        if (subscribers.contains(userName)) {
+            System.out.println("User " + userName + " is already subscribed to chat " + chatId);
+            return;
         }
 
-        // Try to get the user and client objects if they're registered
+        subscribers.add(userName);
+        System.out.println("Added user " + userName + " to chat " + chatId + " subscribers list");
+
+        ChatRoom chatRoom = chatManager.getChatRoom(chatId, chatName);
         User user = clientUsers.get(userName);
         ClientInterface client = clients.get(userName);
 
-        // If the user is registered with the RMI service, perform additional actions
         if (user != null && client != null) {
-            // Subscribe user to chat using Observer pattern
-            ChatRoom chatRoom = chatManager.getChatRoom(chatId, chatName);
             ChatUser chatUser = chatManager.getChatUser(user, client);
             chatUser.subscribe(chatRoom);
 
-            // Save subscription to database
             try {
-                // Check if subscription already exists
-                Subscription existingSubscription = subscriptionDAO.getSubscriptionByUserAndChat(user.getUser_id(), chatId);
-                if (existingSubscription == null) {
-                    // Create new subscription
-                    Subscription subscription = new Subscription();
-                    subscription.setUser(user);
-                    subscription.setChat(chat);
-                    subscriptionDAO.saveSubscription(subscription);
-                    System.out.println("Saved subscription to database for user " + userName + " to chat " + chatId);
+                Subscription existing = subscriptionDAO.getSubscriptionByUserAndChat(user.getUser_id(), chatId);
+                if (existing == null && chat != null) {
+                    Subscription newSub = new Subscription();
+                    newSub.setUser(user);
+                    newSub.setChat(chat);
+                    subscriptionDAO.saveSubscription(newSub);
+                    System.out.println("Saved subscription for " + userName);
                 }
             } catch (Exception e) {
-                System.err.println("Error saving subscription to database: " + e.getMessage());
+                System.err.println("Error saving subscription: " + e.getMessage());
                 e.printStackTrace();
             }
 
-            // Notify other subscribers that this user joined
             String joinTime = timeFormat.format(new Date());
             String nickname = user.getNickname() != null ? user.getNickname() : userName;
 
             for (String subscriber : subscribers) {
-                if (!subscriber.equals(userName)) {
-                    try {
-                        ClientInterface subscriberClient = clients.get(subscriber);
-                        if (subscriberClient != null) {
-                            subscriberClient.notifyUserJoined(nickname, joinTime);
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                try {
+                    ClientInterface subscriberClient = clients.get(subscriber);
+                    if (subscriberClient != null) {
+                        subscriberClient.notifyUserJoined(nickname, joinTime);
                     }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
 
-            // Log the join event
+            // 👇 Send join event as SYSTEM message (chat bubble) to the joining user as well
+            if (client != null) {
+                client.receiveMessage("SYSTEM: \"" + nickname + "\" has joined: " + joinTime);
+            }
+
             if (chatLogs.containsKey(chatId)) {
                 chatLogs.get(chatId).append("\"")
                         .append(nickname)
@@ -300,73 +342,91 @@ public class ChatServiceImpl extends UnicastRemoteObject implements ChatService 
                         .append("\n");
             }
 
-            // Notify the user that they joined the chat
-            if (clients.containsKey(userName)) {
-                clients.get(userName).notifyChatStarted(chatId, joinTime);
+            try {
+                String start = chat != null && chat.getStartedAt() != null
+                        ? timeFormat.format(chat.getStartedAt()) : joinTime;
+                client.notifyChatStarted(chatId, start);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
+
+        } else {
+            System.out.println("User " + userName + " is not yet registered with RMI.");
         }
     }
 
-    @Override
-    public void unsubscribeFromChat(int chatId, String userName) throws RemoteException {
-        // Unsubscribe user from chat using Observer pattern
-        ChatRoom chatRoom = chatManager.getChatRoom(chatId);
-        ChatUser chatUser = chatManager.getChatUser(userName);
 
-        if (chatRoom != null && chatUser != null) {
-            chatUser.unsubscribe(chatRoom);
+    @Override
+    public synchronized void unsubscribeFromChat(int chatId, String userName) throws RemoteException {
+        // Check if the chat exists in our subscriptions map
+        if (!chatSubscriptions.containsKey(chatId)) {
+            System.out.println("Chat " + chatId + " not found in subscriptions map");
+            return;
         }
 
-        // Maintain backward compatibility with existing code
-        if (chatSubscriptions.containsKey(chatId)) {
-            Set<String> subscribers = chatSubscriptions.get(chatId);
-            if (subscribers.contains(userName)) {
-                subscribers.remove(userName);
+        // Check if the user is subscribed to this chat
+        Set<String> subscribers = chatSubscriptions.get(chatId);
+        if (!subscribers.contains(userName)) {
+            System.out.println("User " + userName + " is not subscribed to chat " + chatId);
+            return;
+        }
 
-                // Delete subscription from database
-                try {
-                    User user = clientUsers.get(userName);
-                    if (user != null) {
-                        boolean deleted = subscriptionDAO.deleteSubscriptionByUserAndChat(user.getUser_id(), chatId);
-                        if (deleted) {
-                            System.out.println("Deleted subscription from database for user " + userName + " from chat " + chatId);
-                        }
-                    }
-                } catch (Exception e) {
-                    System.err.println("Error deleting subscription from database: " + e.getMessage());
-                    e.printStackTrace();
-                }
+        // Unsubscribe user from chat using Observer pattern if possible
+        ChatRoom chatRoom = chatManager.getChatRoom(chatId);
+        if (chatRoom != null) {
+            ChatUser chatUser = chatManager.getChatUser(userName);
+            if (chatUser != null) {
+                chatUser.unsubscribe(chatRoom);
+                System.out.println("Unsubscribed user " + userName + " from chat " + chatId + " using Observer pattern");
+            }
+        }
 
-                // Notify other subscribers that this user left
-                String leaveTime = timeFormat.format(new Date());
-                User user = clientUsers.get(userName);
-                String nickname = user != null ? user.getNickname() : userName;
+        // Remove from subscriptions map
+        subscribers.remove(userName);
+        System.out.println("Removed user " + userName + " from chat " + chatId + " subscribers list");
 
-                for (String subscriber : subscribers) {
-                    try {
-                        ClientInterface subscriberClient = clients.get(subscriber);
-                        if (subscriberClient != null) {
-                            subscriberClient.notifyUserLeft(nickname, leaveTime);
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-
-                // Log the leave event
-                if (chatLogs.containsKey(chatId)) {
-                    chatLogs.get(chatId).append("\"")
-                            .append(nickname)
-                            .append("\" left: ")
-                            .append(leaveTime)
-                            .append("\n");
-                }
-
-                // If this was the last user, end the chat
-                if (subscribers.isEmpty()) {
-                    endChat(chatId);
+        // Delete subscription from database
+        try {
+            User user = clientUsers.get(userName);
+            if (user != null) {
+                boolean deleted = subscriptionDAO.deleteSubscriptionByUserAndChat(user.getUser_id(), chatId);
+                if (deleted) {
+                    System.out.println("Deleted subscription from database for user " + userName + " from chat " + chatId);
                 }
             }
+        } catch (Exception e) {
+            System.err.println("Error deleting subscription from database: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        // Notify other subscribers that this user left
+        String leaveTime = timeFormat.format(new Date());
+        User user = clientUsers.get(userName);
+        String nickname = user != null ? user.getNickname() : userName;
+
+        for (String subscriber : subscribers) {
+            try {
+                ClientInterface subscriberClient = clients.get(subscriber);
+                if (subscriberClient != null) {
+                    subscriberClient.notifyUserLeft(nickname, leaveTime);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        // Log the leave event
+        if (chatLogs.containsKey(chatId)) {
+            chatLogs.get(chatId).append("\"")
+                    .append(nickname)
+                    .append("\" left: ")
+                    .append(leaveTime)
+                    .append("\n");
+        }
+
+        // If this was the last user, end the chat
+        if (subscribers.isEmpty()) {
+            endChat(chatId);
         }
     }
 
@@ -445,19 +505,18 @@ public class ChatServiceImpl extends UnicastRemoteObject implements ChatService 
     @Override
     public void endChat(int chatId) throws RemoteException {
         if (activeChats.containsKey(chatId)) {
-            // Get end time
             String endTime = timeFormat.format(new Date());
 
-            // Log the end event
             if (chatLogs.containsKey(chatId)) {
-                chatLogs.get(chatId).append("Chat stopped at: ")
-                        .append(endTime)
-                        .append("\n");
+                chatLogs.get(chatId).append("Chat stopped at: ").append(endTime).append("\n");
             }
 
-            // Notify all subscribers that the chat has ended
             if (chatSubscriptions.containsKey(chatId)) {
                 Set<String> subscribers = new HashSet<>(chatSubscriptions.get(chatId));
+
+                // 👇 Send system message to all users (display as chat bubble)
+                notifySubscribedUsers(chatId, "Chat stopped at: " + endTime);
+
                 for (String subscriber : subscribers) {
                     try {
                         if (clients.containsKey(subscriber)) {
@@ -467,13 +526,12 @@ public class ChatServiceImpl extends UnicastRemoteObject implements ChatService 
                         e.printStackTrace();
                     }
                 }
+
                 chatSubscriptions.get(chatId).clear();
             }
 
-            // Save chat log to file
             saveChatLogToFile(chatId);
 
-            // Update chat in database with end time
             try {
                 Chat chat = chatDAO.getChatById(chatId);
                 if (chat != null) {
@@ -484,11 +542,11 @@ public class ChatServiceImpl extends UnicastRemoteObject implements ChatService 
                 e.printStackTrace();
             }
 
-            // Remove from active chats
             activeChats.remove(chatId);
             chatLogs.remove(chatId);
         }
     }
+
 
     private void saveChatLogToFile(int chatId) {
         if (chatLogs.containsKey(chatId)) {
@@ -545,5 +603,42 @@ public class ChatServiceImpl extends UnicastRemoteObject implements ChatService 
         }
 
         System.out.println("Notified and subscribed all users to new chat " + chatId + " created by admin " + adminName);
+    }
+
+    @Override
+    public boolean isUserOnline(String username) throws RemoteException {
+        User user = clientUsers.get(username);
+        return user != null && user.isOnline();
+    }
+
+    @Override
+    public List<User> getOnlineUsers() throws RemoteException {
+        List<User> onlineUsers = new ArrayList<>();
+        for (User user : clientUsers.values()) {
+            if (user.isOnline()) {
+                onlineUsers.add(user);
+            }
+        }
+        return onlineUsers;
+    }
+
+    /**
+     * Broadcasts a user's online status to all connected clients
+     * @param username The username of the user whose status changed
+     * @param isOnline The new online status
+     */
+    private void broadcastUserOnlineStatus(String username, boolean isOnline) {
+        for (Map.Entry<String, ClientInterface> entry : clients.entrySet()) {
+            try {
+                // Don't notify the user about their own status change
+                if (!entry.getKey().equals(username)) {
+                    entry.getValue().updateUserOnlineStatus(username, isOnline);
+                }
+            } catch (Exception e) {
+                System.err.println("Error notifying client " + entry.getKey() + " about user status change: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+        System.out.println("Broadcasted " + username + " status change to " + (clients.size() - 1) + " clients. Status: " + (isOnline ? "Online" : "Offline"));
     }
 }

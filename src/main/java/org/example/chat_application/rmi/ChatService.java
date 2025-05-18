@@ -23,4 +23,8 @@ public interface ChatService extends Remote {
 
     // Notify all users about a new chat created by an admin
     void notifyAllUsersAboutNewChat(int chatId, String adminName) throws RemoteException;
+
+    // Online status methods
+    boolean isUserOnline(String username) throws RemoteException;
+    List<User> getOnlineUsers() throws RemoteException;
 }

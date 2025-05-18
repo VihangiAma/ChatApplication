@@ -1,5 +1,6 @@
 package org.example.chat_application.controller;
 
+import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -23,17 +24,20 @@ import org.example.chat_application.dao.impl.UserDAOImpl;
 import org.example.chat_application.model.Chat;
 import org.example.chat_application.model.User;
 import org.example.chat_application.rmi.ChatService;
+import org.example.chat_application.rmi.client.ClientInterface;
 import org.example.chat_application.util.HibernateUtil;
 
+import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 
 import java.io.File;
 import java.io.IOException;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.List;
 
-public class UserDashboardController {
+public class UserDashboardController extends UnicastRemoteObject implements ClientInterface {
 
     @FXML
     private AnchorPane NotificatinPane;
@@ -51,7 +55,7 @@ public class UserDashboardController {
     private TextField email; // Assuming email field is shown but not updated.
 
     @FXML
-    private ImageView logout;
+    private Button logoutBtn;
 
     @FXML
     private AnchorPane myChatPane;
@@ -125,6 +129,11 @@ public class UserDashboardController {
 
     private ObservableList<String> notifications = FXCollections.observableArrayList();
 
+    public UserDashboardController() throws RemoteException {
+        super();
+    }
+
+
     public void setUser(User user) {
         this.user = user;
 
@@ -142,6 +151,8 @@ public class UserDashboardController {
         try {
             Registry registry = LocateRegistry.getRegistry("localhost", 1099);
             chatService = (ChatService) registry.lookup("chat");
+
+            chatService.registerClient(this, user.getUsername(), user);
 
             // Update subscribed chats list
             updateSubscribedChats();
@@ -178,6 +189,51 @@ public class UserDashboardController {
         // Update notification count on button
         notificationCount = notifications.size();
         notifi.setText("🔔 Notifications (" + notificationCount + ")");
+    }
+
+    @Override
+    public void receiveMessage(String message) throws RemoteException {
+        // Not used in dashboard, so leave empty
+    }
+
+    @Override
+    public void notifyChatStarted(int chatId, String time) throws RemoteException {
+        // Not used in dashboard, so leave empty
+    }
+
+    @Override
+    public void notifyUserJoined(String nickname, String time) throws RemoteException {
+        // Not used in dashboard, so leave empty
+    }
+
+    @Override
+    public void notifyUserLeft(String nickname, String time) throws RemoteException {
+        // Not used in dashboard, so leave empty
+    }
+
+    @Override
+    public void notifyChatEnded(String time) throws RemoteException {
+        // Not used in dashboard, so leave empty
+    }
+
+    @Override
+    public void notifyAdminStartedChat(int chatId, String adminName) throws RemoteException {
+        // You can reuse your existing handler
+        //handleAdminStartedChat(chatId, adminName);
+    }
+
+    @Override
+    public void updateUserOnlineStatus(String username, boolean isOnline) throws RemoteException {
+        // Optional: you can show online status here if needed
+        //System.out.println("User " + username + " is now " + (isOnline ? "online" : "offline"));
+    }
+
+    @Override
+    public void receiveDashboardNotification(String message) throws RemoteException {
+        Platform.runLater(() -> {
+            notifications.add("🔔 " + message);
+            incrementNotifications();
+        });
     }
 
     /**
@@ -293,8 +349,9 @@ public class UserDashboardController {
             }
         }
     }*/
-    private void updateSubscribedChats() {
-        subscribedChatIds.clear();
+    private synchronized void updateSubscribedChats() {
+        // Create a temporary list to collect the subscribed chat IDs
+        List<Integer> tempSubscribedChatIds = new ArrayList<>();
 
         if (chatService != null && user != null) {
             try {
@@ -302,15 +359,26 @@ public class UserDashboardController {
                 for (Chat chat : chats) {
                     List<String> subscribers = chatService.getSubscribedUsers(chat.getChatId());
                     if (subscribers.contains(user.getUsername())) {
-                        subscribedChatIds.add(chat.getChatId());
+                        tempSubscribedChatIds.add(chat.getChatId());
                     }
                 }
+
+                // Only clear and update the main list once we have collected all the IDs
+                subscribedChatIds.clear();
+                subscribedChatIds.addAll(tempSubscribedChatIds);
+
+                System.out.println("Updated subscribed chats for user " + user.getUsername() + ": " + subscribedChatIds);
             } catch (Exception e) {
                 System.err.println("Error updating subscribed chats: " + e.getMessage());
+                e.printStackTrace();
             }
         }
     }
-
+    /*@Override
+    public void notifyAdminStartedChat(int chatId, String adminName) throws RemoteException {
+        handleAdminStartedChat(chatId, adminName);
+    }
+*/
 
     /**
      * Checks if the user is subscribed to a chat
@@ -443,8 +511,7 @@ public class UserDashboardController {
                             showAlert(Alert.AlertType.INFORMATION, "Subscribed",
                                 "You subscribed to chat: " + finalChatName);
 
-                            // Open the chat window after successful subscription
-                            openChat(chat);
+                            // Chat window opening removed as per requirement
                         });
 
                     } catch (Exception e) {
@@ -700,7 +767,7 @@ public class UserDashboardController {
 
 
     @FXML
-    void logout(MouseEvent event) {
+    void logout(ActionEvent event) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Logout Confirmation");
         alert.setHeaderText("You're about to log out!");
@@ -715,7 +782,7 @@ public class UserDashboardController {
                 Parent root = loader.load();
 
                 // Get the current stage
-                Stage stage = (Stage) logout.getScene().getWindow();
+                Stage stage = (Stage) logoutBtn.getScene().getWindow();
 
                 // Set the new scene
                 Scene scene = new Scene(root);

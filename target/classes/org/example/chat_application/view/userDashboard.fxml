@@ -13,149 +13,215 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
+<?import javafx.scene.effect.DropShadow?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="850.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.chat_application.controller.UserDashboardController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="850.0" stylesheets="@../css/style.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.chat_application.controller.UserDashboardController">
    <children>
       <BorderPane prefHeight="500.0" prefWidth="850.0">
          <left>
-            <VBox fx:id="vBoxMenu" prefHeight="500.0" prefWidth="227.0" style="-fx-background-color: #007074;" BorderPane.alignment="CENTER">
+            <VBox fx:id="vBoxMenu" prefHeight="500.0" prefWidth="227.0" style="-fx-background-color: linear-gradient(to bottom, #1a2a6c, #2a4858); -fx-padding: 10;" BorderPane.alignment="CENTER">
                <children>
-                  <ImageView fx:id="profileImage" fitHeight="104.0" fitWidth="94.0" pickOnBounds="true" preserveRatio="true">
+                  <AnchorPane prefHeight="120.0" prefWidth="227.0" style="-fx-background-color: rgba(255,255,255,0.1); -fx-background-radius: 15;">
+                     <children>
+                        <ImageView fx:id="profileImage" fitHeight="80.0" fitWidth="80.0" layoutX="74.0" layoutY="10.0" pickOnBounds="true" preserveRatio="true" styleClass="profile-pic">
+                           <image>
+                              <Image url="@../images/user1.png" />
+                           </image>
+                           <effect>
+                              <DropShadow />
+                           </effect>
+                        </ImageView>
+                        <Label fx:id="nicknameLabel" alignment="CENTER" layoutX="74.0" layoutY="95.0" text="Tom" textFill="WHITE">
+                           <font>
+                              <Font name="System Bold" size="20.0" />
+                           </font>
+                        </Label>
+                     </children>
                      <VBox.margin>
-                        <Insets left="60.0" top="30.0" />
+                        <Insets bottom="20.0" top="20.0" />
                      </VBox.margin>
-                     <image>
-                        <Image url="@../images/user1.png" />
-                     </image>
-                  </ImageView>
-                  <Label fx:id="nicknameLabel" alignment="CENTER" text="Tom" textFill="#f20101">
+                  </AnchorPane>
+                  <Button fx:id="myChats" mnemonicParsing="false" onAction="#showChats" prefHeight="40.0" prefWidth="180.0" style="-fx-background-color: rgba(255,255,255,0.2); -fx-background-radius: 20; -fx-text-fill: white;" text="MY CHATS">
+                     <VBox.margin>
+                        <Insets bottom="10.0" left="20.0" top="10.0" />
+                     </VBox.margin>
                      <font>
-                        <Font name="System Bold" size="29.0" />
+                        <Font name="System Bold" size="14.0" />
                      </font>
-                     <VBox.margin>
-                        <Insets left="80.0" top="20.0" />
-                     </VBox.margin>
-                  </Label>
-                  <Button fx:id="myChats" mnemonicParsing="false" onAction="#showChats" prefHeight="34.0" prefWidth="144.0" text="MY CHATS">
-                     <VBox.margin>
-                        <Insets left="50.0" top="50.0" />
-                     </VBox.margin>
                   </Button>
-                  <Button fx:id="notifi" mnemonicParsing="false" onAction="#showNotifications" prefHeight="34.0" prefWidth="144.0" text="🔔 Notifications (2)">
+                  <Button fx:id="notifi" mnemonicParsing="false" onAction="#showNotifications" prefHeight="40.0" prefWidth="180.0" style="-fx-background-color: rgba(255,255,255,0.2); -fx-background-radius: 20; -fx-text-fill: white;" text="🔔 NOTIFICATIONS">
                      <VBox.margin>
-                        <Insets left="50.0" top="30.0" />
+                        <Insets bottom="10.0" left="20.0" top="10.0" />
                      </VBox.margin>
+                     <font>
+                        <Font name="System Bold" size="14.0" />
+                     </font>
                   </Button>
-                  <Button fx:id="profileSettings" mnemonicParsing="false" onAction="#showProfileSettings" prefHeight="41.0" prefWidth="144.0" text="PROFILE SETTINGS">
+                  <Button fx:id="profileSettings" mnemonicParsing="false" onAction="#showProfileSettings" prefHeight="40.0" prefWidth="180.0" style="-fx-background-color: rgba(255,255,255,0.2); -fx-background-radius: 20; -fx-text-fill: white;" text="PROFILE SETTINGS">
                      <VBox.margin>
-                        <Insets left="50.0" top="30.0" />
+                        <Insets bottom="10.0" left="20.0" top="10.0" />
                      </VBox.margin>
+                     <font>
+                        <Font name="System Bold" size="14.0" />
+                     </font>
                   </Button>
-                  <ImageView fx:id="logout" fitHeight="42.0" fitWidth="38.0" onMouseClicked="#logout" pickOnBounds="true" preserveRatio="true">
-                     <image>
-                        <Image url="@../images/logout.png" />
-                     </image>
+                  <Button fx:id="logoutBtn" mnemonicParsing="false" onAction="#logout" prefHeight="40.0" prefWidth="180.0" style="-fx-background-color: linear-gradient(to right, #FF416C, #FF4B2B); -fx-background-radius: 20; -fx-text-fill: white; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 8, 0, 0, 2);" text="LOGOUT">
                      <VBox.margin>
-                        <Insets left="50.0" top="50.0" />
+                        <Insets bottom="10.0" left="20.0" top="80.0" />
                      </VBox.margin>
-                  </ImageView>
+                     <graphic>
+                        <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@../images/logout.png" />
+                           </image>
+                        </ImageView>
+                     </graphic>
+                     <font>
+                        <Font name="System Bold" size="14.0" />
+                     </font>
+                  </Button>
                </children>
             </VBox>
          </left>
          <center>
             <AnchorPane fx:id="chats" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
                <children>
-                  <AnchorPane fx:id="myChatPane" prefHeight="500.0" prefWidth="623.0" style="-fx-background-color: #034C53;">
+                  <AnchorPane fx:id="myChatPane" prefHeight="500.0" prefWidth="623.0" style="-fx-background-color: linear-gradient(to bottom right, #2c3e50, #4ca1af);">
                      <children>
-                        <Label layoutX="29.0" layoutY="38.0" prefHeight="54.0" prefWidth="198.0" text="MY CHATS" textFill="#f2f2f2">
+                        <Label layoutX="30.0" layoutY="30.0" prefHeight="54.0" prefWidth="198.0" text="MY CHATS" textFill="WHITE" style="-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 4, 0, 1, 1);">
                            <font>
-                              <Font name="System Bold" size="29.0" />
-                           </font></Label>
+                              <Font name="System Bold" size="32.0" />
+                           </font>
+                        </Label>
 
                         <!-- All Chats Section -->
-                        <Label layoutX="65.0" layoutY="100.0" prefHeight="30.0" prefWidth="198.0" text="All Available Chats" textFill="#f2f2f2">
-                           <font>
-                              <Font name="System Bold" size="16.0" />
-                           </font>
-                        </Label>
-                        <ScrollPane fx:id="allChatsScrollPane" layoutX="65.0" layoutY="138.0" prefHeight="150.0" prefWidth="486.0">
-                          <content>
-                            <VBox fx:id="allChatsVBox" prefHeight="140.0" prefWidth="467.0" spacing="10" style="-fx-padding: 10;">
-                                <!-- All chats will be added here dynamically -->
-                            </VBox>
-                          </content>
-                        </ScrollPane>
+                        <AnchorPane layoutX="30.0" layoutY="100.0" prefHeight="180.0" prefWidth="560.0" style="-fx-background-color: rgba(255,255,255,0.1); -fx-background-radius: 15;">
+                           <children>
+                              <Label layoutX="20.0" layoutY="15.0" prefHeight="30.0" prefWidth="198.0" text="All Available Chats" textFill="WHITE">
+                                 <font>
+                                    <Font name="System Bold" size="18.0" />
+                                 </font>
+                              </Label>
+                              <ScrollPane fx:id="allChatsScrollPane" layoutX="20.0" layoutY="50.0" prefHeight="110.0" prefWidth="520.0" style="-fx-background: transparent; -fx-background-color: transparent; -fx-border-color: rgba(255,255,255,0.2); -fx-border-radius: 5;">
+                                <content>
+                                  <VBox fx:id="allChatsVBox" prefHeight="100.0" prefWidth="500.0" spacing="10" style="-fx-padding: 10; -fx-background-color: rgba(255,255,255,0.05);">
+                                      <!-- All chats will be added here dynamically -->
+                                  </VBox>
+                                </content>
+                              </ScrollPane>
+                           </children>
+                        </AnchorPane>
 
                         <!-- Subscribed Chats Section -->
-                        <Label layoutX="65.0" layoutY="300.0" prefHeight="30.0" prefWidth="198.0" text="My Subscribed Chats" textFill="#f2f2f2">
+                        <AnchorPane layoutX="30.0" layoutY="300.0" prefHeight="180.0" prefWidth="560.0" style="-fx-background-color: rgba(255,255,255,0.1); -fx-background-radius: 15;">
+                           <children>
+                              <Label layoutX="20.0" layoutY="15.0" prefHeight="30.0" prefWidth="198.0" text="My Subscribed Chats" textFill="WHITE">
+                                 <font>
+                                    <Font name="System Bold" size="18.0" />
+                                 </font>
+                              </Label>
+                              <ScrollPane fx:id="subscribedChatsScrollPane" layoutX="20.0" layoutY="50.0" prefHeight="110.0" prefWidth="520.0" style="-fx-background: transparent; -fx-background-color: transparent; -fx-border-color: rgba(255,255,255,0.2); -fx-border-radius: 5;">
+                                <content>
+                                  <VBox fx:id="subscribedChatsVBox" prefHeight="100.0" prefWidth="500.0" spacing="10" style="-fx-padding: 10; -fx-background-color: rgba(255,255,255,0.05);">
+                                      <!-- Subscribed chats will be added here dynamically -->
+                                  </VBox>
+                                </content>
+                              </ScrollPane>
+                           </children>
+                        </AnchorPane>
+                     </children>
+                  </AnchorPane>
+
+                  <AnchorPane fx:id="NotificatinPane" prefHeight="500.0" prefWidth="622.0" style="-fx-background-color: linear-gradient(to bottom right, #2c3e50, #4ca1af);" visible="false">
+                     <children>
+                        <Label layoutX="30.0" layoutY="30.0" prefHeight="45.0" prefWidth="250.0" text="Notifications" textFill="WHITE" style="-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 4, 0, 1, 1);">
                            <font>
-                              <Font name="System Bold" size="16.0" />
+                              <Font name="System Bold" size="32.0" />
                            </font>
                         </Label>
-                        <ScrollPane fx:id="subscribedChatsScrollPane" layoutX="65.0" layoutY="338.0" prefHeight="150.0" prefWidth="486.0">
-                          <content>
-                            <VBox fx:id="subscribedChatsVBox" prefHeight="140.0" prefWidth="467.0" spacing="10" style="-fx-padding: 10;  ">
-                                <!-- Subscribed chats will be added here dynamically -->
-                            </VBox>
-                          </content>
-                        </ScrollPane>
-                     </children>
-                  </AnchorPane>
-                  <AnchorPane fx:id="NotificatinPane" prefHeight="500.0" prefWidth="622.0" style="-fx-background-color: #034C53;" visible="false">
-                     <children>
-                        <Label layoutX="36.0" layoutY="46.0" prefHeight="45.0" prefWidth="195.0" text="Notification" textFill="WHITE">
+                        <AnchorPane layoutX="30.0" layoutY="100.0" prefHeight="330.0" prefWidth="560.0" style="-fx-background-color: rgba(255,255,255,0.1); -fx-background-radius: 15;">
+                           <children>
+                              <ListView fx:id="notificationListView" layoutX="20.0" layoutY="20.0" prefHeight="290.0" prefWidth="520.0" style="-fx-background-color: rgba(255,255,255,0.05); -fx-border-color: rgba(255,255,255,0.2); -fx-border-radius: 5;" />
+                           </children>
+                        </AnchorPane>
+                        <Button fx:id="clearNotificationsBtn" layoutX="30.0" layoutY="445.0" mnemonicParsing="false" onAction="#clearNotifications" prefHeight="35.0" prefWidth="160.0" style="-fx-background-color: rgba(255,0,0,0.3); -fx-background-radius: 20; -fx-text-fill: white;" text="Clear All Notifications">
                            <font>
-                              <Font size="33.0" />
-                           </font></Label>
-                        <ListView fx:id="notificationListView" layoutX="36.0" layoutY="130.0" prefHeight="292.0" prefWidth="554.0" />
-                        <Button fx:id="clearNotificationsBtn" layoutX="36.0" layoutY="430.0" mnemonicParsing="false" onAction="#clearNotifications" text="Clear All Notifications" />
-                        <Button fx:id="refreshNotificationsBtn" layoutX="500.0" layoutY="430.0" mnemonicParsing="false" onAction="#refreshNotifications" text="Refresh" />
-                     </children>
-                  </AnchorPane>
-                  <AnchorPane fx:id="ProfilePane" prefHeight="500.0" prefWidth="625.0" style="-fx-background-color: #034C53;" visible="false">
-                     <children>
-                        <Label layoutX="14.0" layoutY="34.0" prefHeight="18.0" prefWidth="129.0" text="Profile" textFill="#e7dede">
-                           <font>
-                              <Font size="33.0" />
-                           </font></Label>
-                        <Button fx:id="change" layoutX="339.0" layoutY="143.0" mnemonicParsing="false" onAction="#changeImage" prefHeight="27.0" prefWidth="104.0" text="Choose Image">
-                           <font>
-                              <Font size="13.0" />
+                              <Font name="System Bold" size="12.0" />
                            </font>
                         </Button>
-                        <ImageView fitHeight="98.0" fitWidth="107.0" layoutX="241.0" layoutY="59.0" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="@../images/user1.png" />
-                           </image>
-                        </ImageView>
-                        <Label layoutX="36.0" layoutY="362.0" prefHeight="18.0" prefWidth="85.0" text="Username" textFill="#e1dfdf">
+                        <Button fx:id="refreshNotificationsBtn" layoutX="500.0" layoutY="445.0" mnemonicParsing="false" onAction="#refreshNotifications" prefHeight="35.0" prefWidth="90.0" style="-fx-background-color: rgba(255,255,255,0.2); -fx-background-radius: 20; -fx-text-fill: white;" text="Refresh">
                            <font>
-                              <Font size="19.0" />
+                              <Font name="System Bold" size="12.0" />
+                           </font>
+                        </Button>
+                     </children>
+                  </AnchorPane>
+
+                  <AnchorPane fx:id="ProfilePane" prefHeight="500.0" prefWidth="625.0" style="-fx-background-color: linear-gradient(to bottom right, #2c3e50, #4ca1af);" visible="false">
+                     <children>
+                        <Label layoutX="30.0" layoutY="30.0" prefHeight="45.0" prefWidth="250.0" text="Profile Settings" textFill="WHITE" style="-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 4, 0, 1, 1);">
+                           <font>
+                              <Font name="System Bold" size="32.0" />
                            </font>
                         </Label>
-                        <Label layoutX="29.0" layoutY="241.0" prefHeight="18.0" prefWidth="58.0" text="Email" textFill="#eceaea">
+
+                        <AnchorPane layoutX="30.0" layoutY="100.0" prefHeight="120.0" prefWidth="560.0" style="-fx-background-color: rgba(255,255,255,0.1); -fx-background-radius: 15;">
+                           <children>
+                              <ImageView fitHeight="80.0" fitWidth="80.0" layoutX="30.0" layoutY="20.0" pickOnBounds="true" preserveRatio="true" styleClass="profile-pic">
+                                 <image>
+                                    <Image url="@../images/user1.png" />
+                                 </image>
+                                 <effect>
+                                    <DropShadow />
+                                 </effect>
+                              </ImageView>
+                              <Button fx:id="change" layoutX="150.0" layoutY="45.0" mnemonicParsing="false" onAction="#changeImage" prefHeight="30.0" prefWidth="120.0" style="-fx-background-color: rgba(255,255,255,0.2); -fx-background-radius: 20; -fx-text-fill: white;" text="Choose Image">
+                                 <font>
+                                    <Font name="System Bold" size="12.0" />
+                                 </font>
+                              </Button>
+                           </children>
+                        </AnchorPane>
+
+                        <AnchorPane layoutX="30.0" layoutY="240.0" prefHeight="200.0" prefWidth="560.0" style="-fx-background-color: rgba(255,255,255,0.1); -fx-background-radius: 15;">
+                           <children>
+                              <Label layoutX="20.0" layoutY="20.0" prefHeight="30.0" prefWidth="100.0" text="Email" textFill="WHITE">
+                                 <font>
+                                    <Font name="System Bold" size="16.0" />
+                                 </font>
+                              </Label>
+                              <TextField fx:id="email" layoutX="20.0" layoutY="50.0" prefHeight="30.0" prefWidth="240.0" style="-fx-background-color: rgba(255,255,255,0.8); -fx-background-radius: 5;" />
+
+                              <Label layoutX="300.0" layoutY="20.0" prefHeight="30.0" prefWidth="100.0" text="Password" textFill="WHITE">
+                                 <font>
+                                    <Font name="System Bold" size="16.0" />
+                                 </font>
+                              </Label>
+                              <PasswordField fx:id="pwd" layoutX="300.0" layoutY="50.0" prefHeight="30.0" prefWidth="240.0" style="-fx-background-color: rgba(255,255,255,0.8); -fx-background-radius: 5;" />
+
+                              <Label layoutX="20.0" layoutY="100.0" prefHeight="30.0" prefWidth="100.0" text="Username" textFill="WHITE">
+                                 <font>
+                                    <Font name="System Bold" size="16.0" />
+                                 </font>
+                              </Label>
+                              <TextField fx:id="uname" layoutX="20.0" layoutY="130.0" prefHeight="30.0" prefWidth="240.0" style="-fx-background-color: rgba(255,255,255,0.8); -fx-background-radius: 5;" />
+
+                              <Label layoutX="300.0" layoutY="100.0" prefHeight="30.0" prefWidth="100.0" text="Nickname" textFill="WHITE">
+                                 <font>
+                                    <Font name="System Bold" size="16.0" />
+                                 </font>
+                              </Label>
+                              <TextField fx:id="nickname" layoutX="300.0" layoutY="130.0" prefHeight="30.0" prefWidth="240.0" style="-fx-background-color: rgba(255,255,255,0.8); -fx-background-radius: 5;" />
+                           </children>
+                        </AnchorPane>
+
+                        <Button fx:id="update" layoutX="250.0" layoutY="455.0" mnemonicParsing="false" onAction="#detailsUpdate" prefHeight="35.0" prefWidth="120.0" style="-fx-background-color: #4CAF50; -fx-background-radius: 20; -fx-text-fill: white;" text="Update Profile">
                            <font>
-                              <Font size="19.0" />
+                              <Font name="System Bold" size="14.0" />
                            </font>
-                        </Label>
-                        <Label layoutX="313.0" layoutY="362.0" prefHeight="18.0" prefWidth="91.0" text="NickName" textFill="WHITE">
-                           <font>
-                              <Font size="19.0" />
-                           </font>
-                        </Label>
-                        <Label layoutX="314.0" layoutY="241.0" prefHeight="18.0" prefWidth="94.0" text="Password" textFill="#efeaea">
-                           <font>
-                              <Font size="19.0" />
-                           </font>
-                        </Label>
-                        <TextField fx:id="email" layoutX="122.0" layoutY="243.0" prefHeight="26.0" prefWidth="163.0" />
-                        <TextField fx:id="uname" layoutX="123.0" layoutY="363.0" prefHeight="26.0" prefWidth="162.0" />
-                        <PasswordField fx:id="pwd" layoutX="409.0" layoutY="243.0" prefHeight="26.0" prefWidth="201.0" />
-                        <TextField fx:id="nickname" layoutX="409.0" layoutY="363.0" prefHeight="26.0" prefWidth="200.0" />
-                        <Button fx:id="update" layoutX="404.0" layoutY="435.0" mnemonicParsing="false" onAction="#detailsUpdate" prefHeight="45.0" prefWidth="105.0" text="Update">
-                           <font>
-                              <Font size="16.0" />
-                           </font>
+                           <effect>
+                              <DropShadow />
+                           </effect>
                         </Button>
                      </children>
                   </AnchorPane>

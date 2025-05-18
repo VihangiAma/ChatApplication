@@ -14,4 +14,10 @@ public interface ClientInterface extends Remote {
 
     // Admin notifications
     void notifyAdminStartedChat(int chatId, String adminName) throws RemoteException;
+
+    // Online status notifications
+    void updateUserOnlineStatus(String username, boolean isOnline) throws RemoteException;
+
+    // ✅ Dashboard notification
+    void receiveDashboardNotification(String message) throws RemoteException;
 }

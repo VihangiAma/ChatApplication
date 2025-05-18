@@ -81,6 +81,15 @@ public class ChatManager {
         String username = user.getUsername();
         if (!chatUsers.containsKey(username)) {
             chatUsers.put(username, new ChatUser(user, clientInterface));
+        } else {
+            // Update the existing ChatUser's clientInterface to ensure it's using the latest one
+            ChatUser existingUser = chatUsers.get(username);
+            if (existingUser != null && clientInterface != null && 
+                !existingUser.getClientInterface().equals(clientInterface)) {
+                // Replace with updated user that has the new clientInterface
+                chatUsers.put(username, new ChatUser(user, clientInterface));
+                System.out.println("Updated clientInterface for user: " + username);
+            }
         }
         return chatUsers.get(username);
     }
@@ -123,7 +132,7 @@ public class ChatManager {
     public boolean subscribeUserToChat(String username, int chatId) {
         ChatUser user = chatUsers.get(username);
         ChatRoom chatRoom = chatRooms.get(chatId);
-        
+
         if (user != null && chatRoom != null) {
             user.subscribe(chatRoom);
             return true;
@@ -141,7 +150,7 @@ public class ChatManager {
     public boolean unsubscribeUserFromChat(String username, int chatId) {
         ChatUser user = chatUsers.get(username);
         ChatRoom chatRoom = chatRooms.get(chatId);
-        
+
         if (user != null && chatRoom != null) {
             user.unsubscribe(chatRoom);
             return true;
@@ -160,7 +169,7 @@ public class ChatManager {
     public boolean sendMessage(String username, int chatId, String message) {
         ChatUser user = chatUsers.get(username);
         ChatRoom chatRoom = chatRooms.get(chatId);
-        
+
         if (user != null && chatRoom != null) {
             return user.sendMessage(chatRoom, message);
         }

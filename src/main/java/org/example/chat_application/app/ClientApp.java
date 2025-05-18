@@ -1,4 +1,4 @@
-package org.example.chat_application.app;
+/*package org.example.chat_application.app;
 
 import org.example.chat_application.model.User;
 import org.example.chat_application.rmi.ChatService;
@@ -89,4 +89,4 @@ public class ClientApp {
             }
         }
     }
-}
+}*/

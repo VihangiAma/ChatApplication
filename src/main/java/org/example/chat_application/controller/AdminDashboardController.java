@@ -25,6 +25,7 @@ import org.example.chat_application.dao.impl.UserDAOImpl;
 import org.example.chat_application.model.Chat;
 import org.example.chat_application.model.User;
 import org.example.chat_application.controller.NewChatController;
+import org.example.chat_application.controller.SubscriptionPopupController;
 import org.example.chat_application.rmi.ChatService;
 import org.example.chat_application.util.AlertUtil;
 import org.example.chat_application.util.HibernateUtil;
@@ -35,6 +36,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.util.Date;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
@@ -45,7 +47,11 @@ import java.util.Date;
 
 public class AdminDashboardController implements javafx.fxml.Initializable {
     @FXML
-    private ImageView Logout;
+    private Button logoutBtn;
+
+    // Old logout image view, replaced with button
+    // @FXML
+    // private ImageView Logout;
 
     @FXML
     private AnchorPane ManageUser;
@@ -477,7 +483,7 @@ public class AdminDashboardController implements javafx.fxml.Initializable {
         openButton.setOnAction(event -> {
             // Handle opening the chat
             System.out.println("Opening chat: " + chat.getChatId());
-            // This would typically open the chat in a new window or navigate to a chat view
+            openSubscriptionPopup(chat);
         });
 
         chatBox.getChildren().addAll(infoBox, openButton);
@@ -653,7 +659,7 @@ public class AdminDashboardController implements javafx.fxml.Initializable {
     }
 
     @FXML
-    void logout(MouseEvent event) {
+    void logout(ActionEvent event) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Logout Confirmation");
         alert.setHeaderText("You're about to log out!");
@@ -668,7 +674,7 @@ public class AdminDashboardController implements javafx.fxml.Initializable {
                 Parent root = loader.load();
 
                 // Get the current stage
-                Stage stage = (Stage) Logout.getScene().getWindow();
+                Stage stage = (Stage) logoutBtn.getScene().getWindow();
 
                 // Set the new scene
                 Scene scene = new Scene(root);
@@ -778,9 +784,74 @@ public class AdminDashboardController implements javafx.fxml.Initializable {
     }
 
     /**
-     * Deletes a user from the database
-     * @param user The user to delete
+     * Opens the subscription popup for a chat
+     * @param chat The chat to manage subscriptions for
      */
+    private void openSubscriptionPopup(Chat chat) {
+        try {
+            // Load the subscription popup
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/chat_application/view/subscription_popup.fxml"));
+            Parent root = loader.load();
+
+            // Get the controller
+            SubscriptionPopupController controller = loader.getController();
+
+            // Initialize the controller with chat, admin user, and chat service
+            controller.setChat(chat);
+            controller.setAdminUser(adminUser);
+
+            // Get the RMI service
+            try {
+                Registry registry = LocateRegistry.getRegistry("localhost", 1099);
+                ChatService chatService = (ChatService) registry.lookup("chat");
+                controller.setChatService(chatService);
+
+                // Set callback for when chat is started
+                controller.setOnChatStarted(result -> {
+                    // Reload chat data
+                    loadChatData();
+
+                    // Add notification
+                    notifications.add(new Notification(new Date().toString(), "Chat", 
+                        "Chat " + chat.getChatId() + " started by admin"));
+                    notificationTable.refresh();
+                });
+
+            } catch (Exception e) {
+                System.err.println("Error connecting to chat service: " + e.getMessage());
+                e.printStackTrace();
+
+                // Show error message
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Error");
+                alert.setHeaderText(null);
+                alert.setContentText("Failed to connect to chat service: " + e.getMessage());
+                alert.showAndWait();
+                return;
+            }
+
+            // Create a new stage for the popup
+            Stage stage = new Stage();
+            stage.setTitle("Manage Chat Subscriptions");
+            stage.setScene(new Scene(root));
+            stage.setResizable(false);
+
+            // Show the popup and wait for it to close
+            stage.showAndWait();
+
+        } catch (IOException e) {
+            System.err.println("Error loading subscription popup: " + e.getMessage());
+            e.printStackTrace();
+
+            // Show error message
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error");
+            alert.setHeaderText(null);
+            alert.setContentText("Failed to open subscription popup: " + e.getMessage());
+            alert.showAndWait();
+        }
+    }
+
     private void deleteUser(User user) {
         try {
             // Show confirmation dialog

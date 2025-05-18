@@ -8,86 +8,199 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.text.Font?>
+<?import javafx.scene.effect.DropShadow?>
+<?import javafx.geometry.Insets?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.chat_application.controller.RegisterController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="900.0" stylesheets="@../css/style.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.chat_application.controller.RegisterController">
    <children>
-      <BorderPane prefHeight="500.0" prefWidth="800.0">
+      <BorderPane prefHeight="600.0" prefWidth="900.0">
          <left>
-            <AnchorPane prefHeight="483.0" prefWidth="378.0" BorderPane.alignment="CENTER">
+            <AnchorPane prefHeight="600.0" prefWidth="350.0" style="-fx-background-color: linear-gradient(to bottom right, #1a2a6c, #2a4858);" BorderPane.alignment="CENTER">
                <children>
-                  <ImageView fitHeight="555.0" fitWidth="385.0" pickOnBounds="true" preserveRatio="true">
+                  <ImageView fitHeight="400.0" fitWidth="300.0" layoutX="25.0" layoutY="100.0" pickOnBounds="true" preserveRatio="true">
                      <image>
                         <Image url="@../images/signup.jpg" />
                      </image>
+                     <effect>
+                        <DropShadow />
+                     </effect>
                   </ImageView>
+                  <Label layoutX="25.0" layoutY="50.0" text="Join Our Community" textFill="WHITE">
+                     <font>
+                        <Font name="System Bold" size="28.0" />
+                     </font>
+                     <effect>
+                        <DropShadow />
+                     </effect>
+                  </Label>
+                  <Label layoutX="25.0" layoutY="520.0" text="Start chatting with friends today!" textFill="WHITE">
+                     <font>
+                        <Font size="16.0" />
+                     </font>
+                  </Label>
                </children>
             </AnchorPane>
          </left>
          <center>
-            <AnchorPane prefHeight="512.0" prefWidth="425.0" style="-fx-background-color: pink;" BorderPane.alignment="CENTER">
+            <AnchorPane prefHeight="600.0" prefWidth="550.0" style="-fx-background-color: white;" BorderPane.alignment="CENTER">
                <children>
-                  <Label layoutX="3.0" layoutY="14.0" text="Create Your Account">
-                     <font>
-                        <Font name="System Bold" size="42.0" />
-                     </font>
-                  </Label>
-                  <Label layoutX="16.0" layoutY="162.0" text="Email">
-                     <font>
-                        <Font size="19.0" />
-                     </font>
-                  </Label>
-                  <Label layoutX="16.0" layoutY="201.0" text="Username">
-                     <font>
-                        <Font size="19.0" />
-                     </font>
-                  </Label>
-                  <Label layoutX="14.0" layoutY="236.0" text="Password">
-                     <font>
-                        <Font size="19.0" />
-                     </font>
-                  </Label>
-                  <Label layoutX="13.0" layoutY="271.0" text="Confirm Password">
-                     <font>
-                        <Font size="19.0" />
-                     </font>
-                  </Label>
-                  <Label layoutX="16.0" layoutY="310.0" text="NickName">
-                     <font>
-                        <Font size="19.0" />
-                     </font>
-                  </Label>
-                  <Label layoutX="16.0" layoutY="343.0" text="Profile Picture">
-                     <font>
-                        <Font size="19.0" />
-                     </font>
-                  </Label>
+                  <VBox alignment="TOP_CENTER" layoutX="25.0" layoutY="20.0" prefHeight="560.0" prefWidth="500.0" spacing="15">
+                     <children>
+                        <Label text="Create Your Account" textFill="#1a2a6c">
+                           <font>
+                              <Font name="System Bold" size="32.0" />
+                           </font>
+                           <VBox.margin>
+                              <Insets bottom="10.0" top="20.0" />
+                           </VBox.margin>
+                        </Label>
 
-                  <!-- Input fields -->
-                  <TextField fx:id="email" layoutX="232.0" layoutY="163.0" prefWidth="174.0" />
-                  <TextField fx:id="userName" layoutX="232.0" layoutY="202.0" prefWidth="173.0" />
-                  <PasswordField fx:id="pwd" layoutX="232.0" layoutY="237.0" prefWidth="173.0" />
-                  <PasswordField fx:id="conpwd" layoutX="232.0" layoutY="273.0" prefWidth="172.0" />
-                  <TextField fx:id="nickname" layoutX="232.0" layoutY="311.0" prefWidth="175.0" />
-                  <TextField fx:id="profilepr" editable="false" layoutX="232.0" layoutY="343.0" prefWidth="175.0" promptText="Choose image..." />
+                        <Button fx:id="accountbtn" mnemonicParsing="false" onAction="#gotoAcc" prefHeight="30.0" prefWidth="120.0" style="-fx-background-color: #1a2a6c; -fx-background-radius: 15;" text="Go to Login" textFill="WHITE">
+                           <font>
+                              <Font name="System Bold" size="12.0" />
+                           </font>
+                           <VBox.margin>
+                              <Insets bottom="20.0" />
+                           </VBox.margin>
+                        </Button>
 
-                  <!-- Upload Button -->
-                  <Button fx:id="uploadBtn" layoutX="232.0" layoutY="373.0" mnemonicParsing="false" onAction="#uploadImage" text="Upload Image" />
+                        <AnchorPane prefHeight="400.0" prefWidth="500.0" style="-fx-background-color: rgba(240,240,240,0.5); -fx-background-radius: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 10, 0, 0, 0);">
+                           <children>
+                              <VBox layoutX="25.0" layoutY="20.0" prefHeight="360.0" prefWidth="450.0" spacing="15">
+                                 <children>
+                                    <!-- Email Field -->
+                                    <Label text="Email" textFill="#1a2a6c">
+                                       <font>
+                                          <Font name="System Bold" size="14.0" />
+                                       </font>
+                                    </Label>
+                                    <TextField fx:id="email" prefHeight="35.0" prefWidth="450.0" promptText="Enter your email" style="-fx-background-color: white; -fx-background-radius: 5; -fx-border-color: #cccccc; -fx-border-radius: 5; -fx-padding: 8;">
+                                       <font>
+                                          <Font size="14.0" />
+                                       </font>
+                                    </TextField>
 
-                  <!-- ImageView to preview -->
-                  <ImageView fx:id="profileImageView" fitHeight="80.0" fitWidth="80.0" layoutX="90.0" layoutY="380.0" preserveRatio="true" />
+                                    <!-- Username Field -->
+                                    <Label text="Username" textFill="#1a2a6c">
+                                       <font>
+                                          <Font name="System Bold" size="14.0" />
+                                       </font>
+                                       <VBox.margin>
+                                          <Insets top="5.0" />
+                                       </VBox.margin>
+                                    </Label>
+                                    <TextField fx:id="userName" prefHeight="35.0" prefWidth="450.0" promptText="Choose a username" style="-fx-background-color: white; -fx-background-radius: 5; -fx-border-color: #cccccc; -fx-border-radius: 5; -fx-padding: 8;">
+                                       <font>
+                                          <Font size="14.0" />
+                                       </font>
+                                    </TextField>
 
-                  <!-- Sign up button -->
-                  <Button fx:id="signup" layoutX="171.0" layoutY="470.0" mnemonicParsing="false" onAction="#userSignup" prefHeight="41.0" prefWidth="122.0" style="-fx-background-color: purple;" text="SIGN UP" textFill="#f7f1f1">
-                     <font>
-                        <Font name="System Bold" size="18.0" />
-                     </font>
-                  </Button>
-                  <Button fx:id="accountbtn" layoutX="319.0" layoutY="97.0" mnemonicParsing="false" onAction="#gotoAcc" style="-fx-background-color: #3D365C;" text="Goto Account" textFill="WHITE">
-                     <font>
-                        <Font name="System Bold" size="12.0" />
-                     </font>
-                  </Button>
+                                    <!-- Password Fields -->
+                                    <HBox spacing="10">
+                                       <children>
+                                          <VBox prefWidth="220.0" spacing="5">
+                                             <children>
+                                                <Label text="Password" textFill="#1a2a6c">
+                                                   <font>
+                                                      <Font name="System Bold" size="14.0" />
+                                                   </font>
+                                                </Label>
+                                                <PasswordField fx:id="pwd" prefHeight="35.0" prefWidth="220.0" promptText="Enter password" style="-fx-background-color: white; -fx-background-radius: 5; -fx-border-color: #cccccc; -fx-border-radius: 5; -fx-padding: 8;">
+                                                   <font>
+                                                      <Font size="14.0" />
+                                                   </font>
+                                                </PasswordField>
+                                             </children>
+                                          </VBox>
+                                          <VBox prefWidth="220.0" spacing="5">
+                                             <children>
+                                                <Label text="Confirm Password" textFill="#1a2a6c">
+                                                   <font>
+                                                      <Font name="System Bold" size="14.0" />
+                                                   </font>
+                                                </Label>
+                                                <PasswordField fx:id="conpwd" prefHeight="35.0" prefWidth="220.0" promptText="Confirm password" style="-fx-background-color: white; -fx-background-radius: 5; -fx-border-color: #cccccc; -fx-border-radius: 5; -fx-padding: 8;">
+                                                   <font>
+                                                      <Font size="14.0" />
+                                                   </font>
+                                                </PasswordField>
+                                             </children>
+                                          </VBox>
+                                       </children>
+                                       <VBox.margin>
+                                          <Insets top="5.0" />
+                                       </VBox.margin>
+                                    </HBox>
+
+                                    <!-- Nickname Field -->
+                                    <Label text="Nickname" textFill="#1a2a6c">
+                                       <font>
+                                          <Font name="System Bold" size="14.0" />
+                                       </font>
+                                       <VBox.margin>
+                                          <Insets top="5.0" />
+                                       </VBox.margin>
+                                    </Label>
+                                    <TextField fx:id="nickname" prefHeight="35.0" prefWidth="450.0" promptText="Choose a nickname" style="-fx-background-color: white; -fx-background-radius: 5; -fx-border-color: #cccccc; -fx-border-radius: 5; -fx-padding: 8;">
+                                       <font>
+                                          <Font size="14.0" />
+                                       </font>
+                                    </TextField>
+
+                                    <!-- Profile Picture -->
+                                    <HBox alignment="CENTER_LEFT" spacing="15">
+                                       <children>
+                                          <VBox spacing="5">
+                                             <children>
+                                                <Label text="Profile Picture" textFill="#1a2a6c">
+                                                   <font>
+                                                      <Font name="System Bold" size="14.0" />
+                                                   </font>
+                                                </Label>
+                                                <HBox spacing="10">
+                                                   <children>
+                                                      <TextField fx:id="profilepr" editable="false" prefHeight="35.0" prefWidth="250.0" promptText="Choose image..." style="-fx-background-color: white; -fx-background-radius: 5; -fx-border-color: #cccccc; -fx-border-radius: 5; -fx-padding: 8;">
+                                                         <font>
+                                                            <Font size="14.0" />
+                                                         </font>
+                                                      </TextField>
+                                                      <Button fx:id="uploadBtn" mnemonicParsing="false" onAction="#uploadImage" prefHeight="35.0" prefWidth="100.0" style="-fx-background-color: #4c6ef5; -fx-background-radius: 5; -fx-text-fill: white;" text="Browse">
+                                                         <font>
+                                                            <Font name="System Bold" size="12.0" />
+                                                         </font>
+                                                      </Button>
+                                                   </children>
+                                                </HBox>
+                                             </children>
+                                          </VBox>
+                                          <ImageView fx:id="profileImageView" fitHeight="70.0" fitWidth="70.0" pickOnBounds="true" preserveRatio="true" style="-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 5, 0, 0, 0);" />
+                                       </children>
+                                       <VBox.margin>
+                                          <Insets top="5.0" />
+                                       </VBox.margin>
+                                    </HBox>
+                                 </children>
+                              </VBox>
+                           </children>
+                        </AnchorPane>
+
+                        <!-- Sign up button -->
+                        <Button fx:id="signup" mnemonicParsing="false" onAction="#userSignup" prefHeight="45.0" prefWidth="200.0" style="-fx-background-color: #4CAF50; -fx-background-radius: 25;" text="CREATE ACCOUNT" textFill="WHITE">
+                           <font>
+                              <Font name="System Bold" size="18.0" />
+                           </font>
+                           <effect>
+                              <DropShadow />
+                           </effect>
+                           <VBox.margin>
+                              <Insets top="20.0" />
+                           </VBox.margin>
+                        </Button>
+                     </children>
+                  </VBox>
                </children>
             </AnchorPane>
          </center>

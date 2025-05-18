@@ -3,6 +3,7 @@ package org.example.chat_application.controller;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.DatePicker;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import org.example.chat_application.dao.impl.ChatDAOImpl;
@@ -13,8 +14,8 @@ import org.example.chat_application.util.HibernateUtil;
 import org.hibernate.SessionFactory;
 
 import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Date;
 
 public class NewChatController {
@@ -22,7 +23,7 @@ public class NewChatController {
     private TextField Chatnamefield;
 
     @FXML
-    private TextField DateField;
+    private DatePicker DateField;
 
     @FXML
     private TextField descriptionField;
@@ -57,7 +58,7 @@ public class NewChatController {
         try {
             // Validate input
             String chatName = Chatnamefield.getText().trim();
-            String dateStr = DateField.getText().trim();
+            LocalDate selectedDate = DateField.getValue();
             String description = descriptionField.getText().trim();
 
             if (chatName.isEmpty()) {
@@ -69,15 +70,10 @@ public class NewChatController {
             Chat newChat = new Chat();
 
             // Set the start date if provided, otherwise use current time
-            if (!dateStr.isEmpty()) {
-                try {
-                    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-                    Date parsedDate = dateFormat.parse(dateStr);
-                    newChat.setStartedAt(new Timestamp(parsedDate.getTime()));
-                } catch (ParseException e) {
-                    AlertUtil.showError("Date Format Error", "Please enter date in format YYYY-MM-DD");
-                    return;
-                }
+            if (selectedDate != null) {
+                // Convert LocalDate to Date
+                Date date = Date.from(selectedDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+                newChat.setStartedAt(new Timestamp(date.getTime()));
             } else {
                 newChat.setStartedAt(new Timestamp(new Date().getTime()));
             }

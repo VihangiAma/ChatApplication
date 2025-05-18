@@ -12,7 +12,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.Node;
-import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import org.example.chat_application.model.User;
@@ -65,7 +64,6 @@ public class ChatWindowController extends UnicastRemoteObject implements ClientI
     private String profileImagePath;
     private boolean isSubscribed = false;
 
-    // For active users display
     private VBox activeUsersBox;
     private Timer activeUsersTimer;
 
@@ -74,114 +72,66 @@ public class ChatWindowController extends UnicastRemoteObject implements ClientI
     }
 
     public void initialize() {
-        // Disable message field until chat is joined
         messageField.setDisable(true);
         sendButton.setDisable(true);
-
-        // Set initial subscription status
         updateSubscriptionUI(false);
-
-        // Create and add active users box
         createActiveUsersBox();
     }
 
-    /**
-     * Creates and adds the active users box to the UI
-     */
     private void createActiveUsersBox() {
-        // Create a VBox for active users
         activeUsersBox = new VBox(10);
         activeUsersBox.setPadding(new Insets(10));
         activeUsersBox.setStyle("-fx-background-color: #034C53;");
         activeUsersBox.setPrefWidth(150);
 
-        // Add a label for the active users section
         Label activeUsersLabel = new Label("Active Users");
         activeUsersLabel.setTextFill(Color.WHITE);
         activeUsersLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14;");
         activeUsersBox.getChildren().add(activeUsersLabel);
 
-        // Add the active users box to the right side of the root BorderPane
         root.setRight(activeUsersBox);
     }
 
-    /**
-     * Fetches and updates the list of active users in the chat
-     */
     private void updateActiveUsersList() {
         if (chatService != null && currentChatId > 0) {
             try {
-                // Get active users from the chat service
                 List<String> activeUsers = chatService.getActiveUsers(currentChatId);
-
-                // Update the UI on the JavaFX application thread
                 Platform.runLater(() -> {
-                    // Clear existing users (except the label)
                     if (activeUsersBox.getChildren().size() > 1) {
                         activeUsersBox.getChildren().remove(1, activeUsersBox.getChildren().size());
                     }
-
-                    // Add each active user to the list
                     for (String username : activeUsers) {
                         Label userLabel = new Label(username);
                         userLabel.setTextFill(Color.WHITE);
                         activeUsersBox.getChildren().add(userLabel);
                     }
-
-                    // Update participant count
                     updateParticipantCount(activeUsers.size());
                 });
             } catch (Exception e) {
-                System.err.println("Error updating active users list: " + e.getMessage());
                 e.printStackTrace();
             }
         }
     }
 
-    /**
-     * Updates the UI elements based on the subscription status
-     * 
-     * @param subscribed true if the user is subscribed, false otherwise
-     */
     private void updateSubscriptionUI(boolean subscribed) {
         isSubscribed = subscribed;
-
-        // Update subscription status label
         if (subscriptionStatusLabel != null) {
-            if (subscribed) {
-                subscriptionStatusLabel.setText("Subscribed");
-                subscriptionStatusLabel.setTextFill(javafx.scene.paint.Color.valueOf("#4CAF50"));
-            } else {
-                subscriptionStatusLabel.setText("Not Subscribed");
-                subscriptionStatusLabel.setTextFill(javafx.scene.paint.Color.valueOf("#ff9999"));
-            }
+            subscriptionStatusLabel.setText(subscribed ? "Subscribed" : "Not Subscribed");
+            subscriptionStatusLabel.setTextFill(subscribed ? Color.GREEN : Color.RED);
         }
-
-        // Update buttons
-        if (subscribeButton != null) {
-            subscribeButton.setDisable(subscribed);
-        }
-        if (unsubscribeButton != null) {
-            unsubscribeButton.setDisable(!subscribed);
-        }
-
-        // Update message field and send button
+        if (subscribeButton != null) subscribeButton.setDisable(subscribed);
+        if (unsubscribeButton != null) unsubscribeButton.setDisable(!subscribed);
         messageField.setDisable(!subscribed);
         sendButton.setDisable(!subscribed);
     }
 
     public void setUser(User user) {
         this.currentUser = user;
-
-        // Set profile image based on user's profile_pic_path
         if (user.getProfile_pic_path() != null && !user.getProfile_pic_path().isEmpty()) {
             this.profileImagePath = user.getProfile_pic_path();
         } else {
-            // Default profile image
             URL imageUrl = getClass().getResource("/org/example/chat_application/images/user1.png");
-            if (imageUrl != null) {
-                this.profileImagePath = imageUrl.toExternalForm();
-            }
+            this.profileImagePath = imageUrl != null ? imageUrl.toExternalForm() : "";
         }
     }
 
@@ -191,42 +141,39 @@ public class ChatWindowController extends UnicastRemoteObject implements ClientI
 
     public void setChatId(int chatId) {
         this.currentChatId = chatId;
+
         try {
-            // Subscribe to the chat
-            chatService.subscribeToChat(chatId, currentUser.getUsername());
+            // ✅ Register the GUI chat controller as RMI client
+            if (chatService != null && currentUser != null) {
+                chatService.registerClient(this, currentUser.getUsername(), currentUser);
+                System.out.println("Client registered with RMI service");
+            }
 
-            // Update UI for subscribed state
+            boolean alreadySubscribed = false;
+            List<String> subscribers = chatService.getSubscribedUsers(chatId);
+            alreadySubscribed = subscribers.contains(currentUser.getUsername());
+
+            if (!alreadySubscribed) {
+                chatService.subscribeToChat(chatId, currentUser.getUsername());
+                addEventMessage("You have joined the chat and are now subscribed.");
+            } else {
+                addEventMessage("You have rejoined the chat. You were already subscribed.");
+            }
+
             updateSubscriptionUI(true);
-
-            // Start timer to update active users list
             startActiveUsersTimer();
-
-            // Initial update of active users list
             updateActiveUsersList();
 
-            // Add event message
-            addEventMessage("You have joined the chat and are now subscribed.");
         } catch (RemoteException e) {
             e.printStackTrace();
             addEventMessage("Error joining chat: " + e.getMessage());
         }
     }
 
-    /**
-     * Starts a timer to periodically update the active users list
-     */
     private void startActiveUsersTimer() {
-        // Cancel existing timer if any
-        if (activeUsersTimer != null) {
-            activeUsersTimer.cancel();
-        }
-
-        // Create a new timer
+        if (activeUsersTimer != null) activeUsersTimer.cancel();
         activeUsersTimer = new Timer();
-
-        // Schedule a task to update the active users list every 5 seconds
         activeUsersTimer.scheduleAtFixedRate(new TimerTask() {
-            @Override
             public void run() {
                 updateActiveUsersList();
             }
@@ -237,13 +184,8 @@ public class ChatWindowController extends UnicastRemoteObject implements ClientI
     void subscribeToChat(ActionEvent event) {
         try {
             if (chatService != null && !isSubscribed) {
-                // Subscribe to the chat
                 chatService.subscribeToChat(currentChatId, currentUser.getUsername());
-
-                // Update UI for subscribed state
                 updateSubscriptionUI(true);
-
-                // Add event message
                 addEventMessage("You have subscribed to this chat and can now send messages.");
             }
         } catch (RemoteException e) {
@@ -256,25 +198,18 @@ public class ChatWindowController extends UnicastRemoteObject implements ClientI
     void unsubscribeFromChat(ActionEvent event) {
         try {
             if (chatService != null && isSubscribed) {
-                // Unsubscribe from the chat
                 chatService.unsubscribeFromChat(currentChatId, currentUser.getUsername());
-
-                // Update UI for unsubscribed state
                 updateSubscriptionUI(false);
-
-                // Add event message
-                addEventMessage("You have unsubscribed from this chat. You can still view messages but cannot send any.");
+                addEventMessage("You have unsubscribed from this chat.");
             }
         } catch (RemoteException e) {
             e.printStackTrace();
-            addEventMessage("Error unsubscribing from chat: " + e.getMessage());
+            addEventMessage("Error unsubscribing: " + e.getMessage());
         }
     }
 
     public void setChatTitle(String title) {
-        if (chatRoomLabel != null) {
-            chatRoomLabel.setText(title);
-        }
+        if (chatRoomLabel != null) chatRoomLabel.setText(title);
     }
 
     public void updateParticipantCount(int count) {
@@ -288,26 +223,17 @@ public class ChatWindowController extends UnicastRemoteObject implements ClientI
         String message = messageField.getText().trim();
         if (!message.isEmpty()) {
             try {
-                // Check if user is subscribed before sending message
                 if (!isSubscribed) {
-                    addEventMessage("You must be subscribed to this chat to send messages. Please subscribe first.");
+                    addEventMessage("You must be subscribed to send messages.");
                     return;
                 }
 
-                // Add message to local chat
-                String nickname = currentUser.getNickname() != null ? 
-                        currentUser.getNickname() : currentUser.getUsername();
+                String nickname = currentUser.getNickname() != null ? currentUser.getNickname() : currentUser.getUsername();
                 addChatMessage(nickname, message, profileImagePath);
-
-                // Send message to server
                 chatService.broadcastMessage(message, currentUser.getUsername());
 
-                // Check if this is a "Bye" message to leave the chat
                 if (message.equalsIgnoreCase("Bye")) {
-                    // Unsubscribe from the chat
                     chatService.unsubscribeFromChat(currentChatId, currentUser.getUsername());
-
-                    // Disable message field
                     messageField.setDisable(true);
                     sendButton.setDisable(true);
                     isSubscribed = false;
@@ -325,10 +251,8 @@ public class ChatWindowController extends UnicastRemoteObject implements ClientI
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/chat_application/view/chat_bubble.fxml"));
             Node node = loader.load();
-
             ChatBubbleController controller = loader.getController();
             controller.setData(name, message, profilePath);
-
             Platform.runLater(() -> {
                 chatBox.getChildren().add(node);
                 scrollPane.setVvalue(1.0);
@@ -342,10 +266,8 @@ public class ChatWindowController extends UnicastRemoteObject implements ClientI
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/chat_application/view/event_bubble.fxml"));
             Node node = loader.load();
-
             EventBubbleController controller = loader.getController();
             controller.setText(text);
-
             Platform.runLater(() -> {
                 chatBox.getChildren().add(node);
                 scrollPane.setVvalue(1.0);
@@ -357,13 +279,7 @@ public class ChatWindowController extends UnicastRemoteObject implements ClientI
 
     public void closeChat() {
         try {
-            // Cancel the active users timer
-            if (activeUsersTimer != null) {
-                activeUsersTimer.cancel();
-                activeUsersTimer = null;
-            }
-
-            // Only unsubscribe if the user is currently subscribed
+            if (activeUsersTimer != null) activeUsersTimer.cancel();
             if (chatService != null && isSubscribed) {
                 chatService.unsubscribeFromChat(currentChatId, currentUser.getUsername());
                 isSubscribed = false;
@@ -372,33 +288,27 @@ public class ChatWindowController extends UnicastRemoteObject implements ClientI
             e.printStackTrace();
         }
 
-        // Close the window
         Platform.runLater(() -> {
             Stage stage = (Stage) root.getScene().getWindow();
             stage.close();
         });
     }
 
-    // ClientInterface implementation
+    // === RMI Callbacks ===
 
     @Override
     public void receiveMessage(String message) throws RemoteException {
         Platform.runLater(() -> {
-            // Check if this is a system message
             if (message.startsWith("SYSTEM: ")) {
                 addEventMessage(message.substring(8));
             } else {
-                // Parse the message to extract sender and content
-                int colonIndex = message.indexOf(": ");
-                if (colonIndex > 0) {
-                    String sender = message.substring(0, colonIndex);
-                    String content = message.substring(colonIndex + 2);
-
-                    // Get profile image for sender (use default for now)
-                    URL imageUrl = getClass().getResource("/org/example/chat_application/images/user1.png");
-                    String profileImage = imageUrl != null ? imageUrl.toExternalForm() : "";
-
-                    addChatMessage(sender, content, profileImage);
+                int idx = message.indexOf(": ");
+                if (idx > 0) {
+                    String sender = message.substring(0, idx);
+                    String content = message.substring(idx + 2);
+                    URL imgUrl = getClass().getResource("/org/example/chat_application/images/user1.png");
+                    String profileImg = imgUrl != null ? imgUrl.toExternalForm() : "";
+                    addChatMessage(sender, content, profileImg);
                 } else {
                     addEventMessage(message);
                 }
@@ -408,22 +318,16 @@ public class ChatWindowController extends UnicastRemoteObject implements ClientI
 
     @Override
     public void notifyChatStarted(int chatId, String time) throws RemoteException {
-        Platform.runLater(() -> {
-            addEventMessage("Chat started at: " + time);
-        });
+        Platform.runLater(() -> addEventMessage("Chat started at: " + time));
     }
 
     @Override
     public void notifyUserJoined(String nickname, String time) throws RemoteException {
         Platform.runLater(() -> {
             addEventMessage("\"" + nickname + "\" has joined: " + time);
-
             try {
-                // Update participant count
-                if (chatService != null) {
-                    int count = chatService.getSubscribedUsers(currentChatId).size();
-                    updateParticipantCount(count);
-                }
+                int count = chatService.getSubscribedUsers(currentChatId).size();
+                updateParticipantCount(count);
             } catch (RemoteException e) {
                 e.printStackTrace();
             }
@@ -434,13 +338,9 @@ public class ChatWindowController extends UnicastRemoteObject implements ClientI
     public void notifyUserLeft(String nickname, String time) throws RemoteException {
         Platform.runLater(() -> {
             addEventMessage("\"" + nickname + "\" left: " + time);
-
             try {
-                // Update participant count
-                if (chatService != null) {
-                    int count = chatService.getSubscribedUsers(currentChatId).size();
-                    updateParticipantCount(count);
-                }
+                int count = chatService.getSubscribedUsers(currentChatId).size();
+                updateParticipantCount(count);
             } catch (RemoteException e) {
                 e.printStackTrace();
             }
@@ -451,15 +351,11 @@ public class ChatWindowController extends UnicastRemoteObject implements ClientI
     public void notifyChatEnded(String time) throws RemoteException {
         Platform.runLater(() -> {
             addEventMessage("Chat stopped at: " + time);
-
-            // Disable message field
             messageField.setDisable(true);
             sendButton.setDisable(true);
-
-            // Close the chat window after a delay
             new Thread(() -> {
                 try {
-                    Thread.sleep(3000); // 3 seconds delay
+                    Thread.sleep(3000);
                     closeChat();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
@@ -470,8 +366,19 @@ public class ChatWindowController extends UnicastRemoteObject implements ClientI
 
     @Override
     public void notifyAdminStartedChat(int chatId, String adminName) throws RemoteException {
+        Platform.runLater(() -> addEventMessage("Admin " + adminName + " started a chat. Join to participate."));
+    }
+
+    @Override
+    public void updateUserOnlineStatus(String username, boolean isOnline) throws RemoteException {
         Platform.runLater(() -> {
-            addEventMessage("Admin " + adminName + " started a chat. Join to participate.");
+            addEventMessage("User " + username + " is now " + (isOnline ? "online" : "offline"));
         });
     }
+    @Override
+    public void receiveDashboardNotification(String message) throws RemoteException {
+        // ChatWindowController doesn't use dashboard notifications, so we can leave it empty
+        System.out.println("Received dashboard notification (ignored in ChatWindow): " + message);
+    }
+
 }
