@@ -1,0 +1,5 @@
+Chat started at: 16:04:31
+tom_boy: hi
+"subhaaa" left: 16:05:59
+"tom_boy" left: 16:06:07
+Chat stopped at: 16:06:07

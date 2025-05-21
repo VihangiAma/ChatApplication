@@ -1,0 +1,4 @@
+Chat started at: 23:21:45
+"tom_boy" has joined: 23:21:52
+"tom_boy" left: 23:22:10
+Chat stopped at: 23:22:10

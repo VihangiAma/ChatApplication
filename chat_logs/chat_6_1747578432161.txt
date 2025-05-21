@@ -1,0 +1,4 @@
+Chat started at: 19:56:34
+Amy_girl: hi
+"Amy_girl" left: 19:57:12
+Chat stopped at: 19:57:12

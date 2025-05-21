@@ -1,0 +1,7 @@
+Chat started at: 21:52:12
+tom_boy: hi
+"Amy_girl" has joined: 21:53:29
+Amy_girl: hello
+"Amy_girl" left: 21:54:12
+"tom_boy" left: 21:54:20
+Chat stopped at: 21:54:20

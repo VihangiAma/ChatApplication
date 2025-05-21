@@ -1,0 +1,6 @@
+Chat started at: 16:10:13
+Mary25: hi
+tom_boy: hi
+"tom_boy" left: 16:17:31
+"Mary25" left: 16:17:40
+Chat stopped at: 16:17:40
