@@ -1,8 +1,0 @@
-Chat started at: 00:02:49
-tom_boy: helllo all
-Amy_girl: hii
-tom_boy: what going on
-Amy_girl: we have to plan worksop
-"tom_boy" left: 00:05:30
-"Amy_girl" left: 00:05:39
-Chat stopped at: 00:05:39
