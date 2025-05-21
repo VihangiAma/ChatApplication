@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE hibernate-configuration PUBLIC
+        "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+
+<hibernate-configuration>
+    <session-factory>
+
+        <!-- Database connection settings -->
+        <property name="hibernate.connection.driver_class">com.mysql.cj.jdbc.Driver</property>
+        <property name="hibernate.connection.url">jdbc:mysql://localhost:3306/chat_app?useSSL=false&amp;serverTimezone=UTC</property>
+        <property name="hibernate.connection.username">root</property>
+        <property name="hibernate.connection.password">root0000</property>
+
+        <!-- JDBC connection pool (use the built-in) -->
+        <property name="hibernate.connection.pool_size">10</property>
+
+        <!-- Specify connection provider -->
+        <property name="hibernate.connection.provider_class">org.hibernate.engine.jdbc.connections.internal.DriverManagerConnectionProviderImpl</property>
+
+        <!-- Specify current session context -->
+        <property name="hibernate.current_session_context_class">thread</property>
+
+        <!-- SQL dialect -->
+        <property name="hibernate.dialect">org.hibernate.dialect.MySQL8Dialect</property>
+
+        <!-- Echo all executed SQL to stdout -->
+        <property name="hibernate.show_sql">true</property>
+
+        <!-- Automatically create or update tables -->
+        <property name="hibernate.hbm2ddl.auto">update</property>
+
+        <!-- Mapped classes -->
+        <mapping class="org.example.chat_application.model.User"/>
+        <mapping class="org.example.chat_application.model.Chat"/>
+        <mapping class="org.example.chat_application.model.Message"/>
+        <mapping class="org.example.chat_application.model.Subscription"/>
+
+    </session-factory>
+</hibernate-configuration>
